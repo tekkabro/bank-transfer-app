@@ -1,0 +1,30 @@
+package com.example.bankapp.service;
+
+import com.example.bankapp.model.BankTransaction;
+import com.example.bankapp.model.TransactionStatus;
+import com.example.bankapp.repository.BankTransactionRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+public class TransactionAuditService {
+
+    private final BankTransactionRepository transactionRepository;
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void recordFailure(String from, String to, BigDecimal amount, String desc) {
+        BankTransaction tx = new BankTransaction();
+        tx.setFromAccount(from);
+        tx.setToAccount(to);
+        tx.setAmount(amount);
+        tx.setCreatedAt(LocalDateTime.now());
+        tx.setDescription(desc);
+        tx.setStatus(TransactionStatus.FAILED);
+        transactionRepository.save(tx);
+    }
+}
